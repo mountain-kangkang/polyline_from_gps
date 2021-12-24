@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+        <title>위도/경도 이용 위치표시</title>
+        <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=ghd9my54on"></script>          <!-- 네이버 맵 API open -->
+        <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>                                                     <!-- csv파일 open을 위한 d3(d3 v3) script -->
+    </head>
+    <body>
+        <div id="wrap" class="section">
+            <p>경로</p>                                                                                                         <!-- "{{gps}}" == "basicMap.html"에서 open한 파일명 -->
+            <div id="map" style="width:100%;height:700px;"></div>                                                                       <!-- 지도 크기 설정 -->
+        </div>
+
+        <script>
+            var polyline = [];
+            var marker = [];
+            var cnt = 0;
+
+            var map = new naver.maps.Map('map', {                                                                                       // 지도 설정
+                zoom: 7,                                                                                                               // 지도 표시할 때 확대 설정
+                center: new naver.maps.LatLng(36.60572394, 128.0683278)                                                                   // 첫번째 위도, 경도를 지도의 중심에 위치하도록 설정
+            });
+
+
+            d3.csv("/static/GPS/tag_GPS.csv", function(data){                                                                          // d3로 "/static/GPS/"에 저장된 csv 읽어옴
+                var polylinePath = [];                                                                                                      // csv에서 위도, 경도를 받아올 배열
+
+                for(var i=0; data[i].Lat != null; i++){
+                    polylinePath[i] =  new naver.maps.LatLng(data[i].Lat, data[i].Lng)                                                  // 배열에 위도, 경도를 저장
+                }
+            
+                polyline[cnt] = new naver.maps.Polyline({                                                                                // 지도에 배열에 저장된 위도, 경도를 따라 경로 표시(그리기)
+                    path: polylinePath,                                                                                                 // 변수에 배열에 저장된 위도, 경도를 따라 그리도록 저장
+                    strokeColor: '#FF0000',                                                                                             // 그릴 선 RGB 색상 설정
+                    strokeOpacity: 0.8,                                                                                                 // 선의 투명도 설정(0~1)
+                    strokeWeight: 6,                                                                                                    // 선의 두깨 설정
+                    map: map                                                                                                            // 오버레이할 지도
+                });
+
+                // 배열 마지막 위치를 마크로 표시함
+                marker[cnt] = new naver.maps.Marker({                                                                                    // 지도에 마크 표시
+                    position: polylinePath[polylinePath.length-1],                                                                      // 마크 표시할 위치(배열의 마지막 위치)
+                    map: map                                                                                                            // 오버레이할 지도
+                });
+
+                var da = String(data[data.length-1].num);
+                var ti = String(data[data.length-1].A);
+                var y = da[0] + da[1] + da[2] + da[3];
+                var mo = da[4] + da[5];
+                var d = da[6] + da[7];
+                var h = ti[0] + ti[1];
+                var mi = ti[2] + ti[3];
+                var s = ti[4] + ti[5];
+                
+                var contentString = [
+                    '<div class="iw_inner">',
+                    '   <h4>&nbsp &nbsp수집 일자</h4>',
+                    '   <p>&nbsp &nbsp날짜 : ' + y + '년&nbsp' + mo + '월&nbsp' + d + '일&nbsp &nbsp<br />',
+                    '   &nbsp &nbsp시간 : ' + h + '시&nbsp' + mi + '분&nbsp' + s + '초&nbsp &nbsp<br />',
+                    '   <br />',
+                    '   &nbsp &nbspGPS_' + da +'_' + ti +'.csv&nbsp &nbsp</p>',                        
+                    '</div>'
+                ].join('');
+
+                var infowindow = new naver.maps.InfoWindow({
+                    content: contentString
+                });
+
+                naver.maps.Event.addListener(marker[cnt], "click", function(e) {
+                    if (infowindow.getMap()) {
+                        infowindow.close();
+                    } else {
+                        infowindow.open(map, marker[cnt]);
+                    }
+                });
+            })
+        </script>
+
+        <form action="/mapping" method="POST" enctype="multipart/form-data">                                                            <!-- POST 형식으로 서버 "@app.route('/mapping')"에 정보 전달 -->
+            <input multiple="multiple" type="file" name ="file[]" accept=".csv" />                                                                            <!-- "file"이란 이름으로 .csv 확장자 파일만 open -->
+            <input type="submit" />                                                                                                     <!-- 제출(전달) -->
+        </form>
+    </body>
+</html>

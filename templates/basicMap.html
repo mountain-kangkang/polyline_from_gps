@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+        <title>위도/경도 위치표시</title>
+    </head>
+    
+    <body>
+        <div id="wrap" class="section">
+            <p>"파일 선택"에서 csv파일 선택 후 "제출" 클릭</p>
+        </div>
+
+        <form action="/mapping" id="FF" method="POST" enctype="multipart/form-data">    <!-- POST 형식으로 서버 "@app.route('/mapping')"에 정보 전달 -->
+            <input multiple="multiple" type="file" name ="file[]" accept=".csv" />      <!-- "file[]"이란 이름으로 .csv 확장자 파일만 open -->
+            <input type="submit" />                                                     <!-- 웹 서버(flask)로 제출(전달) -->
+        </form>
+        <form action="/direct">
+            <input type="submit" value="MAP" />
+        </form>
+    </body>
+</html>
