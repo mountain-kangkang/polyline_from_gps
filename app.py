@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request
+import webbrowser
 import csv
 import os
 
 app = Flask(__name__)
+webbrowser.open("http://127.0.0.1:5500/")
 
 data = ["num", "A", "Lat", "Lng", "B", "C", "D", "E", "F"]                      # tag가 없는 csv(GPS)에 붙일 tag 준비
 
@@ -16,17 +18,17 @@ def upload_file():
     for file in os.scandir('./static/GPS/'):
         os.remove(file.path)
 
-    for file in os.scandir('.//GPS/'):
-        os.remove(file.path)
+    # for file in os.scandir('./GPS/'):
+    #     os.remove(file.path)
 
     if request.method == 'POST':
         fileDown = request.files.getlist('file[]')                              # 파일을 변수에 저장
 
         for f in fileDown:
-            f.save('./GPS/' + f.filename)                                       # JS(JavaScript)에서 절대경로를 알아낼 방법이 없어 원하는 경로에 파일을 저장(상대 경로로 파일을 편집하고 사용하기 위함) 
+            f.save('./X/' + f.filename)                                       # JS(JavaScript)에서 절대경로를 알아낼 방법이 없어 원하는 경로에 파일을 저장(상대 경로로 파일을 편집하고 사용하기 위함) 
             f.close()
                                                                                 # csv파일에 key값이 없으면 읽어오기 힘이듭니다.
-            p =  open('./GPS/' +f.filename, "r", encoding="UTF-8")              # 제출되어 저장된 파일을 open
+            p =  open('./X/' +f.filename, "r", encoding="UTF-8")              # 제출되어 저장된 파일을 open
             rdr = csv.reader(p)                                                 # open한 csv를 읽을 준비
 
             fn = f.filename[4:]
@@ -53,4 +55,5 @@ def directHTML():
 
 
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port=5500)                                          # localhost:5500(127.0.0.1:5500)으로 웹서버 open
+    app.run(host='0.0.0.0', port=5500, debug=True)                                          # localhost:5500(127.0.0.1:5500)으로 웹서버 open
+ 
